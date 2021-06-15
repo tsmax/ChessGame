@@ -44,14 +44,11 @@ class Board:
     def move(self, from_column: int, from_row: int, to_column: int, to_row: int):
         if False in [1 <= i <= 8 for i in (from_column, from_row, to_column, to_row)]:
             return "You can't move like that"
-        from_column, from_row, to_column, to_row = from_column - 1, from_row - 1, to_column - 1, to_row - 1
-        from_cell_figure = self.board[from_row][from_column]
+        from_cell_figure = self.board[from_row-1][from_column-1]
         if from_cell_figure is None:
             return "You can't move like that"
         if from_cell_figure.color != self.current_turn_color:
             return "You can't move like that"
-
-
 
 
 class Figure:
@@ -68,14 +65,58 @@ class Pawn(Figure):
         elif self.color == 'black':
             return 'p '
 
-    def possibility_of_move(self, current_board, from_column, from_row, to_column, to_row):
+    def possibility_of_move(self, current_board, from_column, from_row, to_column, to_row, history_of_moves):
+        # TODO: реализовать взятие на проходе
         if self.color == 'white':
-<<<<<<< HEAD
+            if not (1 <= to_row - from_row <= 2):
+                return False
 
-=======
-            pass
->>>>>>> 9f9eea7 (Initial commit)
+            if to_row - from_row == 2:
+                if from_row != 2:
+                    return False
+                if from_column != to_column:
+                    return False
+                if (current_board[to_row-2][from_column] is not None) or (current_board[to_row-1][from_column] is not None):
+                    return False
+                return True
 
+            if from_column == to_column:
+                if current_board[to_row - 1][from_column] is not None:
+                    return False
+                return True
+
+            to_cell = current_board[to_row-1][to_column-1]
+            if to_cell is None:
+                return False
+            if to_cell.color != 'black':
+                return False
+            return True
+
+        if self.color == 'black':
+            if not (1 <= from_row - to_row <= 2):
+                return False
+
+            if from_row - to_row == 2:
+                if from_row != 7:
+                    return False
+                if from_column != to_column:
+                    return False
+                if (current_board[to_row-1][from_column] is not None) or (
+                        current_board[to_row][from_column] is not None):
+                    return False
+                return True
+
+            if from_column == to_column:
+                if current_board[to_row - 1][from_column] is not None:
+                    return False
+                return True
+
+            to_cell = current_board[to_row - 1][to_column - 1]
+            if to_cell is None:
+                return False
+            if to_cell.color != 'white':
+                return False
+            return True
 
 
 class Bishop(Figure):
