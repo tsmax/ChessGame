@@ -70,7 +70,11 @@ class Pawn(Figure):
 
     def possibility_of_move(self, current_board, from_column, from_row, to_column, to_row):
         if self.color == 'white':
+<<<<<<< HEAD
 
+=======
+            pass
+>>>>>>> 9f9eea7 (Initial commit)
 
 
 
