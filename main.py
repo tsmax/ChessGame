@@ -1,23 +1,36 @@
 class ChessGame:
     def __init__(self):
-        pass
+        self.board = Board()
+        self.main_loop()
+
+    def main_loop(self):
+        while not self.board.check_end():
+            self.board.print_board()
+            while True:
+                print('Enter your move ({}): '.format(self.board.current_turn_color), end='')
+                from_column, from_row, to_column, to_row = map(int, input().split())
+                if self.board.move(from_column, from_row, to_column, to_row):
+                    print(100 * '\n')
+                    break
+                else:
+                    print("You can't move like that")
 
 
 class Board:
     def __init__(self):
-        self.board = [[Rook(1, 8, 'black'), Knight(2, 8, 'black'), Bishop(3, 8, 'black'), Queen(4, 8, 'black'),
-                       King(5, 8, 'black'), Bishop(6, 8, 'black'), Knight(7, 8, 'black'), Rook(8, 8, 'black')],
-                      [Pawn(i, 7, 'black') for i in range(1, 9)],
+        self.board = [[Rook(1, 8, 'white'), Knight(2, 8, 'white'), Bishop(3, 8, 'white'), Queen(4, 8, 'white'),
+                       King(5, 8, 'white'), Bishop(6, 8, 'white'), Knight(7, 8, 'white'), Rook(8, 8, 'white')],
+                      [Pawn(i, 7, 'white') for i in range(1, 9)],
                       [None for _ in range(8)], [None for _ in range(8)],
                       [None for _ in range(8)], [None for _ in range(8)],
-                      [Pawn(i, 2, 'white') for i in range(1, 9)],
-                      [Rook(1, 7, 'white'), Knight(2, 7, 'white'), Bishop(3, 7, 'white'), Queen(4, 7, 'white'),
-                       King(5, 7, 'white'), Bishop(6, 7, 'white'), Knight(7, 7, 'white'), Rook(8, 7, 'white')]]
+                      [Pawn(i, 2, 'black') for i in range(1, 9)],
+                      [Rook(1, 7, 'black'), Knight(2, 7, 'black'), Bishop(3, 7, 'black'), Queen(4, 7, 'black'),
+                       King(5, 7, 'black'), Bishop(6, 7, 'black'), Knight(7, 7, 'black'), Rook(8, 7, 'black')]]
         self.current_turn_color = 'white'
         self.history_of_moves = []
 
     def print_board(self):
-        order_figures = [self.board[i][j] for i in range(8) for j in range(8)]
+        order_figures = [self.board[i][j] for i in range(7, -1, -1) for j in range(8)]
         while None in order_figures:
             order_figures[order_figures.index(None)] = '  '
         print("""
@@ -42,13 +55,37 @@ class Board:
 """.format(*order_figures))
 
     def move(self, from_column: int, from_row: int, to_column: int, to_row: int):
+        # TODO: реализвоать рокировку
+        if not self.check_move(from_column, from_row, to_column, to_row):
+            return False
+        else:
+            self.board[to_row - 1][to_column - 1] = self.board[from_row - 1][from_column - 1]
+            self.board[from_row - 1][from_column - 1] = None
+            self.current_turn_color = 'white' if self.current_turn_color == 'black' else 'black'
+            return True
+
+    def check_move(self, from_column: int, from_row: int, to_column: int, to_row: int):
         if False in [1 <= i <= 8 for i in (from_column, from_row, to_column, to_row)]:
-            return "You can't move like that"
-        from_cell_figure = self.board[from_row-1][from_column-1]
+            return False
+        from_cell_figure = self.board[from_row - 1][from_column - 1]
         if from_cell_figure is None:
-            return "You can't move like that"
+            return False
         if from_cell_figure.color != self.current_turn_color:
-            return "You can't move like that"
+            return False
+        if not from_cell_figure.possibility_of_move(self.board, from_column, from_row, to_column, to_row,
+                                                    self.history_of_moves):
+            return False
+        if not self.possibility_of_move_pin(from_column, from_row, to_column, to_row):
+            return False
+        return True
+
+    def possibility_of_move_pin(self, from_column: int, from_row: int, to_column: int, to_row: int):
+        # TODO: реализовать проверку на связку
+        return True
+
+    def check_end(self):
+        # TODO: реализовать проверку на конец игры (мат, пат, ничья)
+        return False
 
 
 class Figure:
@@ -76,7 +113,8 @@ class Pawn(Figure):
                     return False
                 if from_column != to_column:
                     return False
-                if (current_board[to_row-2][from_column] is not None) or (current_board[to_row-1][from_column] is not None):
+                if (current_board[to_row - 2][from_column] is not None) or (
+                        current_board[to_row - 1][from_column] is not None):
                     return False
                 return True
 
@@ -85,7 +123,7 @@ class Pawn(Figure):
                     return False
                 return True
 
-            to_cell = current_board[to_row-1][to_column-1]
+            to_cell = current_board[to_row - 1][to_column - 1]
             if to_cell is None:
                 return False
             if to_cell.color != 'black':
@@ -101,7 +139,7 @@ class Pawn(Figure):
                     return False
                 if from_column != to_column:
                     return False
-                if (current_board[to_row-1][from_column] is not None) or (
+                if (current_board[to_row - 1][from_column] is not None) or (
                         current_board[to_row][from_column] is not None):
                     return False
                 return True
@@ -159,5 +197,5 @@ class King(Figure):
             return 'k '
 
 
-board = Board()
-board.print_board()
+if __name__ == '__main__':
+    chess_game = ChessGame()
