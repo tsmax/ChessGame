@@ -196,6 +196,3 @@ class King(Figure):
         elif self.color == 'black':
             return 'k '
 
-
-if __name__ == '__main__':
-    chess_game = ChessGame()
