@@ -9,11 +9,13 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import sys
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, game):
         super(MainWindow, self).__init__()
+        self.game = game
         self.setupUi()
 
     def setupUi(self):
@@ -457,7 +459,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.board.x() <= x_click <= self.board.x() + self.board.width():
             if self.board.y() <= y_click <= self.board.y() + self.board.height():
                 self.click_on_board(x_click, y_click)
-        
+
     def click_on_board(self, x_click, y_click):
         Ox = 'abcdefgh'
         Oy = '87654321'
@@ -477,23 +479,36 @@ class MainWindow(QtWidgets.QMainWindow):
         self.selected_cell = cell
 
     def move(self, cell):
-        self.selected_figure.setGeometry(*self.cells_geometry_color[cell][0])
-        if self.cells_geometry_color[cell][1] == 'white':
-            self.selected_figure.setStyleSheet("background-color: {};".format(self.white_background_color))
-        elif self.cells_geometry_color[cell][1] == 'black':
-            self.selected_figure.setStyleSheet("background-color: {};".format(self.black_background_color))
-        self.board.cells[self.selected_cell] = None
-        if self.board.cells[cell] is not None:
-            self.board.cells[cell].deleteLater()
-        self.board.cells[cell] = self.selected_figure
-        self.is_figure_taken = False
-        self.selected_figure = None
-        self.selected_cell = None
+        if self.check_move(cell):
+            self.selected_figure.setGeometry(*self.cells_geometry_color[cell][0])
+            if self.cells_geometry_color[cell][1] == 'white':
+                self.selected_figure.setStyleSheet("background-color: {};".format(self.white_background_color))
+            elif self.cells_geometry_color[cell][1] == 'black':
+                self.selected_figure.setStyleSheet("background-color: {};".format(self.black_background_color))
+            self.board.cells[self.selected_cell] = None
+            if self.board.cells[cell] is not None:
+                self.board.cells[cell].deleteLater()
+            self.board.cells[cell] = self.selected_figure
+            self.is_figure_taken = False
+            self.selected_figure = None
+            self.selected_cell = None
+        else:
+            if self.cells_geometry_color[self.selected_cell][1] == 'white':
+                self.selected_figure.setStyleSheet("background-color: {};".format(self.white_background_color))
+            elif self.cells_geometry_color[self.selected_cell][1] == 'black':
+                self.selected_figure.setStyleSheet("background-color: {};".format(self.black_background_color))
+            self.is_figure_taken = False
+            self.selected_figure = None
+            self.selected_cell = None
 
-if __name__ == "__main__":
-    import sys
+    def check_move(self, cell):
+        move = self.selected_cell + cell
+        return self.game.check_move(move)
 
-    app = QtWidgets.QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec_())
+
+class App:
+    def __init__(self, game):
+        self.app = QtWidgets.QApplication(sys.argv)
+        self.window = MainWindow(game)
+        self.window.show()
+        sys.exit(self.app.exec_())
