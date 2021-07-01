@@ -170,6 +170,19 @@ class Knight(Figure):
         elif self.color == 'black':
             return 'kn'
 
+    def possibility_of_move(self, current_board, from_column, from_row, to_column, to_row, history_of_moves):
+        if (abs(to_column - from_column) == 2) and (abs(to_row - from_row) == 1):
+            if current_board[to_row - 1][to_column - 1] is not None:
+                if current_board[to_row - 1][to_column - 1].color == self.color:
+                    return False
+            return True
+        if (abs(to_column - from_column) == 1) and (abs(to_row - from_row) == 2):
+            if current_board[to_row - 1][to_column - 1] is not None:
+                if current_board[to_row - 1][to_column - 1].color == self.color:
+                    return False
+            return True
+        return False
+
 
 class Rook(Figure):
     def __str__(self):
@@ -177,6 +190,21 @@ class Rook(Figure):
             return 'R '
         elif self.color == 'black':
             return 'r '
+
+    def possibility_of_move(self, current_board, from_column, from_row, to_column, to_row, history_of_moves):
+        if (to_row != from_row) and (to_column != from_column):
+            return False
+        if (to_row == from_row) and (to_column == from_column):
+            return False
+        if current_board[to_row - 1][to_column - 1] is not None:
+            if current_board[to_row - 1][to_column - 1].color == self.color:
+                return False
+        delta_column = 0 if to_column == from_column else 1 if to_column > from_column else -1
+        delta_row = 0 if to_row == from_row else 1 if to_row > from_row else -1
+        for i in range(1, max(abs(from_column - to_column), abs(from_row - to_row))):
+            if current_board[from_row - 1 + delta_row * i][from_column - 1 + delta_column * i] is not None:
+                return False
+        return True
 
 
 class Queen(Figure):
@@ -186,6 +214,15 @@ class Queen(Figure):
         elif self.color == 'black':
             return 'q '
 
+    def possibility_of_move(self, current_board, from_column, from_row, to_column, to_row, history_of_moves):
+        test_rook = Rook(from_column, from_row, self.color)
+        test_bishop = Bishop(from_column, from_row, self.color)
+        if test_rook.possibility_of_move(current_board, from_column, from_row, to_column, to_row, history_of_moves):
+            return True
+        if test_bishop.possibility_of_move(current_board, from_column, from_row, to_column, to_row, history_of_moves):
+            return True
+        return False
+
 
 class King(Figure):
     def __str__(self):
@@ -194,3 +231,39 @@ class King(Figure):
         elif self.color == 'black':
             return 'k '
 
+    def possibility_of_move(self, current_board, from_column, from_row, to_column, to_row, history_of_moves):
+        if (to_row == from_row) and (to_column == from_column):
+            return False
+        if (abs(to_row - from_row) > 1) or (abs(from_column - to_column) > 1):
+            return False
+        if current_board[to_row - 1][to_column - 1] is not None:
+            if current_board[to_row - 1][to_column - 1].color == self.color:
+                return False
+        for row in range(1, 9):
+            for column in range(1, 9):
+                if current_board[row - 1][column - 1] is not None:
+                    if (current_board[row - 1][column - 1].color != self.color) and (type(current_board[row - 1][column - 1]) != King):
+                        if current_board[row - 1][column - 1].possibility_of_move(current_board, column, row, to_column,
+                                                                                  to_row, history_of_moves):
+                            return False
+        if self.color == 'white':
+            if to_row <= 7:
+                if to_column >= 2:
+                    if type(current_board[to_row][to_column - 2]) == Pawn:
+                        if current_board[to_row][to_column - 2].color != self.color:
+                            return False
+                if to_column <= 7:
+                    if type(current_board[to_row][to_column]) == Pawn:
+                        if current_board[to_row][to_column].color != self.color:
+                            return False
+        if self.color == 'black':
+            if to_row >= 2:
+                if to_column >= 2:
+                    if type(current_board[to_row - 2][to_column - 2]) == Pawn:
+                        if current_board[to_row - 2][to_column - 2].color != self.color:
+                            return False
+                if to_column <= 7:
+                    if type(current_board[to_row - 2][to_column]) == Pawn:
+                        if current_board[to_row - 2][to_column].color != self.color:
+                            return False
+        return True
