@@ -149,6 +149,19 @@ class Bishop(Figure):
         elif self.color == 'black':
             return 'b '
 
+    def possibility_of_move(self, current_board, from_column, from_row, to_column, to_row, history_of_moves):
+        if (abs(from_column - to_column) != abs(from_row - to_row)) or (from_column - to_column == 0):
+            return False
+        if current_board[to_row - 1][to_column - 1] is not None:
+            if current_board[to_row - 1][to_column - 1].color == self.color:
+                return False
+        delta_column = 1 if to_column - from_column > 0 else -1
+        delta_row = 1 if to_row - from_row > 0 else -1
+        for i in range(1, abs(from_column - to_column)):
+            if current_board[from_row - 1 + delta_row * i][from_column - 1 + delta_column * i] is not None:
+                return False
+        return True
+
 
 class Knight(Figure):
     def __str__(self):
